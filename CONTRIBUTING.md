@@ -19,7 +19,7 @@
 - Add references for factual claims and distinguish project proposals from implemented features.
 - Document the source and reuse terms of new assets.
 - Keep page styles/behavior in `site.css`/`site.js` and deck styling/behavior in `presentation.css`/`presentation.js`.
-- After changing either PNG master, regenerate WebP variants with `scripts/optimize_images.py` and include them in the change.
+- After changing either JPEG photo master, regenerate WebP variants with `scripts/optimize_images.py` and include them in the change. Preserve source/author/license credits in the page, slides, and `docs/ASSET_CREDITS.md`.
 - Keep content visible by default and reveal JavaScript-only controls only when ready.
 
 ## Browser checklist

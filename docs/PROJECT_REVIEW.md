@@ -4,7 +4,8 @@ Reviewed and improved on 2026-11-17. The original findings below describe the su
 
 ## Short-term improvements completed
 
-- **Images:** responsive WebP variants with PNG fallbacks. The full-size pair is 233,520 bytes, a 94.4% reduction from 4,149,086 bytes. Slide content and images render only when first visited.
+- **Photography update:** the page and slides now show Hailey Dawson using a 3D-printed hand and Danny Letain with an engineering team. These are credited, independently sourced real-world references, with JPEG fallbacks and responsive WebP variants. The full-size WebP pair is 403,140 bytes; the 640-pixel pair is 87,524 bytes. See `ASSET_CREDITS.md` for licenses and modifications.
+- **Image loading:** slide content and images render only when first visited. Before the real-photo update, the earlier conceptual PNG pair had been optimized from 4,149,086 bytes to 233,520 bytes of full-size WebP images.
 - **Progressive enhancement:** page content is visible by default, navigation stays expanded without its script, and presentation buttons become available only after initialization.
 - **Maintainability:** page CSS and JavaScript were extracted into `site.css` and `site.js`; page/illustration overrides were removed from presentation CSS, and HTML/CSS were expanded into readable sections.
 - **Navigation and accessibility:** a skip link, `aria-current` indicators, a complete section menu at every breakpoint, Escape/outside-click menu closing, and preserved modal focus management. Overflowing slides remain scrollable from their beginning.
@@ -21,7 +22,7 @@ Reviewed and improved on 2026-11-17. The original findings below describe the su
 | `newlife-site/dist/site.css` / `site.js` | Page styles, responsive navigation, scroll status, and optional reveal effects. |
 | `newlife-site/dist/presentation.js` | Hard-coded content for 11 slides, rendering logic, keyboard/touch controls, fullscreen, and modal focus management. |
 | `newlife-site/dist/presentation.css` | Presentation-only styles. |
-| `newlife-site/dist/assets/` | Two original PNG illustrations, six responsive WebP derivatives, and an SVG favicon. |
+| `newlife-site/dist/assets/` | JPEG reference photos and responsive WebP variants, earlier unused conceptual artwork, and an SVG favicon. |
 | `newlife-site/.openai/hosting.json` | Static publish-directory setting and a project-specific hosting identifier. |
 | `source-docs/` | Empty. The class notes referenced by page number in the website are not included here. |
 | `tools-temp/` | One-off page transformation scripts, library transfer/download tooling, 17 note images, transfer metadata, Python cache files, and a deployment archive. |
@@ -32,7 +33,7 @@ The scripts in `tools-temp/` reflect earlier editing and transfer operations rat
 
 - A responsive concept website about personalized hand prostheses, 3D printing, AI, IoT, cloud collaboration, circular production, and potential customers.
 - An integrated presentation dialog with 11 slides and multiple navigation methods.
-- Explicit AI-image labels and distinctions between conceptual proposals and existing products.
+- Real-world reference photographs with creator/source/license credits and clear distinctions between the photographed initiatives and the conceptual NewLife proposal.
 - Relative local asset paths, Spanish language metadata, image descriptions, lazy loading on some images, and reduced-motion handling.
 - No application server, database, account system, CAD pipeline, AI model integration, sensor integration, or cloud design-management service is present.
 
@@ -113,7 +114,7 @@ The evidence in this section describes the initial version. Use the completed-st
 
 ### Local results
 
-- The checker passed: 1 HTML page, 40 local references, and 2 JavaScript sources.
+- The checker passed after the photo update: 1 HTML page, 43 local references, and 2 JavaScript sources.
 - In-memory fault injection confirmed that the checker rejects missing assets, incorrect filename casing, missing fragment targets, duplicate IDs, images without an `alt` attribute, and invalid JavaScript.
 - Chromium checks passed with JavaScript disabled, with either page or presentation JavaScript blocked, and with normal/reduced motion.
 - Page navigation/layout checks passed at 1440×900, 1280×720, 1024×768, 768×1024, 375×812, and 320×640.

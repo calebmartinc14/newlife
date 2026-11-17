@@ -2,14 +2,14 @@
 
 A Spanish-language academic concept website exploring personalized hand prostheses, additive manufacturing, and circular design. It includes a scrolling website and an integrated **11-slide presentation**.
 
-The proposed AI, IoT, cloud, and manufacturing services are project concepts. The implemented software is the website and its presentation interface. Illustrations are labeled as AI-generated concepts.
+The proposed AI, IoT, cloud, and manufacturing services are project concepts. The implemented software is the website and its presentation interface. Real photographs show independent prosthetics initiatives, with source and license credits; they do not depict NewLife clients or products.
 
 ## Features
 
 - Responsive sections covering the idea, product, process, enabling technologies, sustainability, market, and future research.
 - Presentation mode with slide selection, arrow-key navigation, touch gestures, and optional fullscreen.
 - Presentation focus management, live slide announcements, and reduced-motion styles.
-- Responsive WebP illustrations with PNG fallbacks; slide images render on first visit.
+- Responsive WebP photographs with JPEG fallbacks; slide images render on first visit.
 - Visible content and expanded navigation when JavaScript is unavailable.
 - Skip-to-content navigation, accessible active-section indicators, and public references.
 - Static HTML, CSS, and JavaScript; no package installation or build step.
@@ -48,7 +48,7 @@ newlife-site/
 ├── .github/workflows/     # Automated checks and manual Pages deployment
 ├── .openai/hosting.json   # Existing project-specific hosting configuration
 ├── dist/                 # Editable website and deployment root
-│   ├── assets/           # PNG masters, responsive WebP copies, and SVG favicon
+│   ├── assets/           # Reference photos, responsive WebP copies, and SVG favicon
 │   ├── index.html        # Page content, references, and presentation shell
 │   ├── site.css          # Theme, page layout, navigation, and illustrations
 │   ├── site.js           # Navigation, scroll status, and optional reveal effects
@@ -89,14 +89,16 @@ GitHub Actions runs both static and browser checks on pushes and pull requests. 
 
 ## Image maintenance
 
-The optimized images are committed and ready to serve. To regenerate them after editing the original PNGs:
+The optimized images are ready to serve. To regenerate them after editing the JPEG working masters:
 
 ```sh
 python -m pip install Pillow==13.0.0
 python scripts/optimize_images.py
 ```
 
-This produces 640, 1024, and 1536-pixel-wide WebP copies. The current full-size pair totals **233,520 bytes**, compared with **4,149,086 bytes** for the PNG originals: **94.4% smaller**. Browsers select an appropriate variant using `<picture>` and `srcset`. See [asset credits](docs/ASSET_CREDITS.md) for provenance notes.
+This produces 640, 1024, and 1536-pixel-wide WebP copies. The current full-size pair totals **403,140 bytes**, compared with **782,963 bytes** for the JPEG pair: **48.5% smaller**. The 640-pixel pair totals about **88 KB**. Browsers select an appropriate variant using `<picture>` and `srcset`.
+
+To re-import the original licensed photographs and regenerate all variants, run `python scripts/optimize_images.py --download`. The import verifies source checksums and creates the 1536×1024 JPEG working masters. See [asset credits](docs/ASSET_CREDITS.md) for photo context, sources, licenses, and modification details.
 
 ## GitHub repository
 
@@ -134,4 +136,4 @@ See [the project review](docs/PROJECT_REVIEW.md) for the folder analysis, comple
 
 ## Licensing
 
-A license has not been selected. Before inviting reuse, choose a license for the code and complete the missing ownership/reuse details in [asset credits](docs/ASSET_CREDITS.md).
+A code license has not been selected. The reference photographs have their own documented licenses; see [asset credits](docs/ASSET_CREDITS.md) for their attribution and the remaining logo/earlier-artwork provenance details.

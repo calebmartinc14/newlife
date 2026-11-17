@@ -7,5 +7,6 @@
 *.py text eol=lf
 *.yml text eol=lf
 *.png binary
+*.jpg binary
 *.webp binary
 *.svg text eol=lf

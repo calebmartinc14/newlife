@@ -110,13 +110,18 @@ header { position: sticky; top: 0; z-index: 30; background: #06121edc; border-bo
 .art-tag.b { right: 0; bottom: 22%; }
 .hero-bottom { border-top: 1px solid #36556970; position: absolute; bottom: 0; left: 0; right: 0; }
 .hero-bottom .wrap { display: flex; justify-content: space-between; padding: 16px 0; color: #8faabb; font-size: .76rem; text-transform: uppercase; letter-spacing: .12em; }
-.ai-visual { position: relative; margin: 0; border: 1px solid #396479; border-radius: 16px; overflow: hidden; background: #0a1b2b; }
-.ai-visual picture { display: block; width: 100%; height: 100%; }
-.ai-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.ai-visual figcaption { position: absolute; left: 16px; bottom: 14px; right: 16px; color: #d7f3f8; font-size: .72rem; background: #06121edb; border: 1px solid #3c687b; padding: 7px 10px; border-radius: 5px; backdrop-filter: blur(8px); }
-.hero-art .ai-visual { width: 100%; height: 90%; transform: rotate(-3deg); box-shadow: 0 35px 80px #01070e99; animation: float 7s ease-in-out infinite; }
-.process-visual { height: 300px; margin: 0 0 30px; }
-.process-visual img { object-position: center 54%; }
+.photo-visual { position: relative; display: grid; grid-template-rows: minmax(0, 1fr) auto; margin: 0; border: 1px solid #396479; border-radius: 16px; overflow: hidden; background: #0a1b2b; }
+.photo-visual picture { display: block; width: 100%; height: 100%; }
+.photo-visual img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.photo-visual figcaption { color: #d7f3f8; font-size: .72rem; background: #06121e; border-top: 1px solid #3c687b; padding: 10px 14px; }
+.photo-visual figcaption a { text-decoration: underline; text-underline-offset: 3px; }
+.hero-art .photo-visual { width: 100%; height: 90%; transform: rotate(-3deg); box-shadow: 0 35px 80px #01070e99; }
+.use-photo img { object-position: 85% center; }
+.process-visual { display: block; max-width: 960px; margin: 0 auto 30px; }
+.process-visual picture { height: auto; aspect-ratio: 3 / 2; }
+.photo-credits { color: var(--muted); padding-left: 24px; }
+.photo-credits li { margin: 20px 0; scroll-margin-top: 96px; }
+.photo-credits strong { color: var(--ink); }
 
 /* Company, product, and process */
 .statement { background: #0a1d2c; border-top: 1px solid #234153; border-bottom: 1px solid #234153; }
@@ -126,7 +131,7 @@ header { position: sticky; top: 0; z-index: 30; background: #06121edc; border-bo
 .statement aside { border-left: 1px solid var(--cyan); padding-left: 26px; color: var(--muted); }
 .product-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 70px; align-items: center; }
 .product-card { min-height: 530px; border: 1px solid #396479; background: radial-gradient(circle at 40% 45%, #20566c 0%, #102d41 46%, #0a1b2b 100%); border-radius: 18px; display: grid; place-items: center; position: relative; overflow: hidden; }
-.product-card .ai-visual { position: absolute; inset: 0; border: 0; border-radius: inherit; }
+.product-card .photo-visual { position: absolute; inset: 0; border: 0; border-radius: inherit; }
 .product-content h3 { font: 600 clamp(2rem, 3vw, 3.1rem)/1.1 "Space Grotesk", sans-serif; letter-spacing: -.05em; margin: 14px 0 22px; }
 .product-content p { color: var(--muted); }
 .feature-list { display: grid; gap: 18px; margin-top: 34px; }
@@ -214,8 +219,7 @@ footer a { color: var(--cyan); }
 }
 
 @media (max-width: 800px) {
-  .process-visual { height: 260px; }
-  .hero-art .ai-visual { height: 95%; max-width: 610px; }
+  .hero-art .photo-visual { height: 95%; max-width: 610px; }
 }
 
 @media (max-width: 680px) {
@@ -229,7 +233,7 @@ footer a { color: var(--cyan); }
   .hero h1 { font-size: clamp(3.3rem, 13vw, 5rem); }
   .hero p { font-size: 1.06rem; }
   .hero-art { height: 340px; }
-  .hero-art .ai-visual { transform: none; animation: none; }
+  .hero-art .photo-visual { transform: none; }
   .art-tag { font-size: .62rem; }
   .art-tag.a { top: 13%; }
   .art-tag.b { bottom: 10%; }
@@ -242,7 +246,6 @@ footer a { color: var(--cyan); }
   .step { min-height: 190px; }
   .step h3 { margin-top: 25px; }
   .product-card { min-height: 360px; }
-  .process-visual { height: 220px; }
   .section { padding: 72px 0; }
   .section-head { margin-bottom: 35px; }
   .closing { padding: 95px 0; }
