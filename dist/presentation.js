@@ -5,7 +5,7 @@
     { section:'inicio', label:'Portada', kicker:'NewLife 3D · Proyecto de clase', title:'Diseñar <em>nuevas posibilidades.</em>', lead:'Una propuesta de prótesis de mano personalizadas, desde el diseño digital hasta el prototipo.', image:assets.hand, alt:'Concepto generado con IA de una mano protésica en tonos grafito y cian', points:['Personalización','Fabricación bajo demanda','Diseño con una mirada circular'], note:'Proyecto conceptual. Las imágenes ilustran una idea, no un dispositivo existente.' },
     { section:'idea', label:'La empresa y la necesidad', kicker:'01 · La empresa', title:'Cada persona, <em>un punto de partida.</em>', lead:'NewLife diseñaría y prototiparía piezas de prótesis de mano adaptadas a cada caso.', points:['Necesidad: geometrías y ajustes que puedan revisarse para una persona concreta.','Clientes posibles: ortopedias, centros especializados y equipos de investigación.','Destinatarios: personas que necesiten una solución protésica, mediante profesionales cualificados.'], callout:'La propuesta nace en Granada: colaboración cercana y diseño documentado.', note:'Cualquier aplicación clínica exigiría evaluación y las autorizaciones correspondientes.' },
     { section:'producto', label:'El producto', kicker:'02 · Producto propuesto', title:'Una mano pensada <em>desde el ajuste.</em>', lead:'Un concepto de prótesis de mano con carcasas personalizadas y componentes sustituibles.', image:assets.hand, alt:'Visualización conceptual de una mano protésica generada con IA', points:['Adaptar medidas y geometría.','Revisar el modelo antes de volver a imprimir.','Estudiar el recambio de una pieza sin sustituir todo el conjunto.'], note:'Ventajas buscadas; el ajuste, la resistencia y la seguridad tendrían que comprobarse.' },
-    { section:'producto', label:'Cómo funcionaría', kicker:'02 · Del diseño al prototipo', title:'Un proceso en <em>cuatro pasos.</em>', lead:'Un recorrido de fabricación propuesto, con revisión humana en cada etapa.', steps:[['01','Escuchar y medir','Definir necesidades con un profesional.'],['02','Diseñar en 3D','Crear el modelo CAD y revisar variantes.'],['03','Imprimir','Preparar las capas y fabricar una pieza de prueba.'],['04','Ensayar y ajustar','Analizar las pruebas y documentar una nueva versión.']], callout:'Medidas → modelo digital → pieza física → revisión', note:'Los ensayos conectados mediante IoT apoyarían la revisión del prototipo.' },
+    { section:'proceso', label:'Cómo funcionaría', kicker:'02 · Del diseño al prototipo', title:'Un proceso en <em>cuatro pasos.</em>', lead:'Un recorrido de fabricación propuesto, con revisión humana en cada etapa.', steps:[['01','Escuchar y medir','Definir necesidades con un profesional.'],['02','Diseñar en 3D','Crear el modelo CAD y revisar variantes.'],['03','Imprimir','Preparar las capas y fabricar una pieza de prueba.'],['04','Ensayar y ajustar','Analizar las pruebas y documentar una nueva versión.']], callout:'Medidas → modelo digital → pieza física → revisión', note:'Los ensayos conectados mediante IoT apoyarían la revisión del prototipo.' },
     { section:'tecnologia', label:'Tecnologías: impresión 3D e IA', kicker:'03 · Tecnologías habilitadoras · 1/2', title:'Del modelo a <em>la pieza.</em>', cards:[['3D','Impresión 3D','Fabricación de objetos capa a capa a partir de un modelo digital.','Imprimir una carcasa de prueba y fabricar solo esa pieza al cambiar sus medidas.'],['IA','Inteligencia artificial','Apoyo para comparar variantes de diseño con restricciones técnicas.','Proponer geometrías internas más ligeras; el equipo revisaría las opciones con simulaciones y ensayos.']], note:'Tecnologías del apartado 1 de los apuntes. La IA no certificaría la seguridad del diseño.' },
     { section:'tecnologia', label:'Tecnologías: IoT y nube', kicker:'03 · Tecnologías habilitadoras · 2/2', title:'Medir, compartir <em>y mejorar.</em>', cards:[['IoT','Internet de las cosas','Sensores conectados a una aplicación para consultar mediciones.','Enviar datos de fuerza y ciclos de apertura del banco de pruebas a un panel.'],['CL','Computación en la nube','Almacenamiento y colaboración sobre versiones de los modelos.','Compartir la versión 02 con el centro colaborador y recoger observaciones antes de imprimir.']], note:'Acceso autorizado y protección de datos como medidas transversales.' },
     { section:'sostenibilidad', label:'Sostenibilidad', kicker:'04 · Economía circular', title:'Fabricar lo necesario. <em>Reparar lo posible.</em>', lead:'Modelo elegido: producción JIT, bajo demanda. Se produciría tras definir el encargo, para limitar stock sin uso.', cards:[['01','Ecodiseño','Revisar el modelo digital y limitar soportes de impresión.','Comparar residuos y consumo por pieza para elegir mejoras.'],['02','Extensión de vida','Estudiar módulos sustituibles y recambios impresos.','Separar restos limpios por material y estudiar su recuperación en maquetas sin uso clínico.']], note:'La energía se mediría con IoT y registros en la nube. El beneficio ambiental tendría que comprobarse.' },
@@ -24,86 +24,196 @@
   const live = document.getElementById('deck-live');
   const fullscreen = document.getElementById('deck-fullscreen');
   const exit = document.getElementById('deck-exit');
-  let index = 0, opened = false, returnFocus = null, returnScroll = 0, touchStart = null;
-  const background = [...document.querySelectorAll('body > header, body > main, body > footer')];
-  const escape = value => String(value).replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  const renderPoints = list => '<ul class="slide-points">'+list.map(text => '<li>'+escape(text)+'</li>').join('')+'</ul>';
+  let index = 0;
+  let opened = false;
+  let returnFocus = null;
+  let returnScroll = 0;
+  let touchStart = null;
+  const background = [...document.querySelectorAll('body > :not(.deck):not(script)')];
+  const inertState = new Map();
+  const escape = value => String(value).replace(/[&<>"']/g, char => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+  }[char]));
+  const renderPoints = list => `<ul class="slide-points">${list.map(
+    text => `<li>${escape(text)}</li>`,
+  ).join('')}</ul>`;
+
+  // Create only lightweight slide containers at startup. Images and content are
+  // rendered when a slide is first visited, rather than during page loading.
   slides.forEach((slide, i) => {
-    const el = document.createElement('article');
-    el.className = 'deck-slide'; el.hidden = true; el.id = 'slide-'+(i+1);
-    el.setAttribute('role','group'); el.setAttribute('aria-roledescription','diapositiva');
-    el.setAttribute('aria-label',`${i+1} de ${slides.length}: ${slide.label}`);
-    const heading = `<p class="slide-kicker">${escape(slide.kicker)}</p><h2 class="slide-title" id="slide-title-${i}">${slide.title}</h2>`;
-    const intro = (slide.lead ? `<p class="slide-lead">${escape(slide.lead)}</p>` : '')+(slide.points ? renderPoints(slide.points) : '');
-    if(slide.image){
-      el.innerHTML = `<div class="slide-split"><div>${heading}${intro}</div><figure class="slide-figure"><img class="slide-image" src="${slide.image}" alt="${escape(slide.alt)}" decoding="async"><figcaption>Imagen conceptual generada con IA · No es un producto o taller real</figcaption></figure></div>`;
-    }else{
-      el.innerHTML = heading+intro;
-      if(slide.cards) el.innerHTML += '<div class="slide-grid">'+slide.cards.map(([code,title,definition,example])=>`<div class="slide-block"><span class="slide-code">${escape(code)}</span><h3>${escape(title)}</h3><p>${escape(definition)}</p><p><strong>Ejemplo NewLife.</strong> ${escape(example)}</p></div>`).join('')+'</div>';
-      if(slide.steps) el.innerHTML += '<div class="slide-steps">'+slide.steps.map(([code,title,text])=>`<div class="slide-block"><span class="slide-code">${code}</span><h3>${escape(title)}</h3><p>${escape(text)}</p></div>`).join('')+'</div>';
-    }
-    if(slide.callout) el.innerHTML += `<div class="slide-callout">${escape(slide.callout)}</div>`;
-    if(slide.note) el.innerHTML += `<p class="slide-note">${escape(slide.note)}</p>`;
-    stage.append(el);
-    picker.add(new Option(`${String(i+1).padStart(2,'0')} · ${slide.label}`,String(i)));
+    const element = document.createElement('article');
+    element.className = 'deck-slide';
+    element.hidden = true;
+    element.id = `slide-${i + 1}`;
+    element.setAttribute('role', 'group');
+    element.setAttribute('aria-roledescription', 'diapositiva');
+    element.setAttribute('aria-label', `${i + 1} de ${slides.length}: ${slide.label}`);
+    stage.append(element);
+    picker.add(new Option(`${String(i + 1).padStart(2, '0')} · ${slide.label}`, String(i)));
   });
   const pages = [...stage.children];
-  function show(value){
-    index = Math.max(0,Math.min(slides.length-1,value));
-    pages.forEach((page,i)=>{page.hidden=i!==index; if(i===index) page.scrollTop=0;});
-    picker.value=String(index); prev.disabled=index===0; next.disabled=index===slides.length-1;
-    count.textContent=`${String(index+1).padStart(2,'0')} / ${slides.length}`;
-    bar.style.width=((index+1)/slides.length*100)+'%';
-    live.textContent=`Diapositiva ${index+1} de ${slides.length}. ${slides[index].label}`;
-  }
-  function open(event){
-    if(opened)return;
-    returnFocus=event?.currentTarget || document.activeElement; returnScroll=window.scrollY;
-    opened=true; deck.hidden=false; document.body.classList.add('presenting');
-    background.forEach(el=>{el.inert=true;});
-    show(index); exit.focus({preventScroll:true});
-  }
-  function close(section){
-    if(!opened)return;
-    opened=false;
-    if(document.fullscreenElement===deck) document.exitFullscreen().catch(()=>{});
-    deck.hidden=true;document.body.classList.remove('presenting'); background.forEach(el=>{el.inert=false;});
-    if(section){document.getElementById(section)?.scrollIntoView({behavior:'instant'});const target=document.getElementById(section);if(target){target.setAttribute('tabindex','-1');target.focus({preventScroll:true});}}
-    else {window.scrollTo({top:returnScroll,behavior:'instant'});returnFocus?.focus({preventScroll:true});}
-  }
-  document.querySelectorAll('[data-present]').forEach(button=>button.addEventListener('click',open));
-  exit.addEventListener('click',()=>close());
-  prev.addEventListener('click',()=>show(index-1));next.addEventListener('click',()=>show(index+1));
-  picker.addEventListener('change',()=>show(Number(picker.value)));
-  document.getElementById('deck-source').addEventListener('click',()=>close(slides[index].section));
-  if(!deck.requestFullscreen)fullscreen.hidden=true;
-  fullscreen.addEventListener('click',async()=>{
-    try {if(document.fullscreenElement===deck)await document.exitFullscreen();else await deck.requestFullscreen();}
-    catch{live.textContent='Pantalla completa no disponible. Puedes seguir presentando en esta ventana.';}
-  });
-  document.addEventListener('fullscreenchange',()=>{fullscreen.textContent=document.fullscreenElement===deck?'Reducir pantalla':'Pantalla completa';});
-  document.addEventListener('keydown',event=>{
-    if(!opened)return;
-    if(event.key==='Escape'){event.preventDefault();close();return;}
-    if(event.key==='Tab'){
-      const focusables=[...deck.querySelectorAll('button:not(:disabled),select')].filter(el=>el.getClientRects().length);
-      const first=focusables[0],last=focusables[focusables.length-1];
-      if(event.shiftKey&&document.activeElement===first){event.preventDefault();last.focus();}
-      else if(!event.shiftKey&&document.activeElement===last){event.preventDefault();first.focus();}return;
+
+  function renderSlide(i) {
+    const element = pages[i];
+    if (element.childElementCount) return;
+    const slide = slides[i];
+    // Slide titles are trusted, locally authored markup using <em> for emphasis.
+    const heading = `<p class="slide-kicker">${escape(slide.kicker)}</p>
+      <h2 class="slide-title" id="slide-title-${i}">${slide.title}</h2>`;
+    const intro = (slide.lead ? `<p class="slide-lead">${escape(slide.lead)}</p>` : '')
+      + (slide.points ? renderPoints(slide.points) : '');
+
+    if (slide.image) {
+      const base = slide.image.replace(/\.png$/, '');
+      element.innerHTML = `<div class="slide-split"><div>${heading}${intro}</div>
+        <figure class="slide-figure"><picture class="slide-picture">
+          <source type="image/webp" srcset="${base}-640.webp 640w, ${base}-1024.webp 1024w, ${base}-1536.webp 1536w"
+            sizes="(max-width: 800px) calc(100vw - 96px), 650px">
+          <img class="slide-image" src="${slide.image}" width="1536" height="1024" alt="${escape(slide.alt)}" decoding="async">
+        </picture><figcaption>Imagen conceptual generada con IA · No es un producto o taller real</figcaption></figure></div>`;
+    } else {
+      element.innerHTML = heading + intro;
+      if (slide.cards) {
+        element.innerHTML += `<div class="slide-grid">${slide.cards.map(
+          ([code, title, definition, example]) => `<div class="slide-block">
+            <span class="slide-code">${escape(code)}</span><h3>${escape(title)}</h3>
+            <p>${escape(definition)}</p><p><strong>Ejemplo NewLife.</strong> ${escape(example)}</p></div>`,
+        ).join('')}</div>`;
+      }
+      if (slide.steps) {
+        element.innerHTML += `<div class="slide-steps">${slide.steps.map(
+          ([code, title, text]) => `<div class="slide-block"><span class="slide-code">${escape(code)}</span>
+            <h3>${escape(title)}</h3><p>${escape(text)}</p></div>`,
+        ).join('')}</div>`;
+      }
     }
-    if(event.altKey||event.ctrlKey||event.metaKey||event.target.matches('select,input,textarea,[contenteditable="true"]'))return;
-    const key=event.key;
-    if(['ArrowRight','ArrowDown','PageDown','ArrowLeft','ArrowUp','PageUp','Home','End'].includes(key)||(key===' '&&!event.target.matches('button'))){
+    if (slide.callout) element.innerHTML += `<div class="slide-callout">${escape(slide.callout)}</div>`;
+    if (slide.note) element.innerHTML += `<p class="slide-note">${escape(slide.note)}</p>`;
+  }
+
+  function show(value) {
+    index = Math.max(0, Math.min(slides.length - 1, value));
+    renderSlide(index);
+    pages.forEach((page, i) => {
+      page.hidden = i !== index;
+      if (i === index) page.scrollTop = 0;
+    });
+    picker.value = String(index);
+    prev.disabled = index === 0;
+    next.disabled = index === slides.length - 1;
+    if ([prev, next].includes(document.activeElement) && document.activeElement.disabled) picker.focus();
+    count.textContent = `${String(index + 1).padStart(2, '0')} / ${slides.length}`;
+    bar.style.width = `${(index + 1) / slides.length * 100}%`;
+    live.textContent = `Diapositiva ${index + 1} de ${slides.length}. ${slides[index].label}`;
+  }
+
+  function open(event) {
+    if (opened) return;
+    returnFocus = event.currentTarget;
+    returnScroll = window.scrollY;
+    document.dispatchEvent(new Event('presentationopen'));
+    opened = true;
+    deck.hidden = false;
+    document.body.classList.add('presenting');
+    background.forEach(element => {
+      inertState.set(element, element.inert);
+      element.inert = true;
+    });
+    show(index);
+    exit.focus({ preventScroll: true });
+  }
+
+  async function close(section) {
+    if (!opened) return;
+    opened = false;
+    if (document.fullscreenElement === deck) {
+      await document.exitFullscreen().catch(() => {});
+    }
+    deck.hidden = true;
+    document.body.classList.remove('presenting');
+    background.forEach(element => { element.inert = inertState.get(element); });
+    inertState.clear();
+    const target = section && document.getElementById(section);
+    if (target) {
+      target.scrollIntoView({ behavior: 'instant' });
+      if (!target.hasAttribute('tabindex')) {
+        target.setAttribute('tabindex', '-1');
+        target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
+      }
+      target.focus({ preventScroll: true });
+    } else {
+      window.scrollTo({ top: returnScroll, behavior: 'instant' });
+      returnFocus?.focus({ preventScroll: true });
+    }
+  }
+
+  exit.addEventListener('click', () => close());
+  prev.addEventListener('click', () => show(index - 1));
+  next.addEventListener('click', () => show(index + 1));
+  picker.addEventListener('change', () => show(Number(picker.value)));
+  document.getElementById('deck-source').addEventListener('click', () => close(slides[index].section));
+  if (!deck.requestFullscreen) fullscreen.hidden = true;
+  fullscreen.addEventListener('click', async () => {
+    try {
+      if (document.fullscreenElement === deck) await document.exitFullscreen();
+      else await deck.requestFullscreen();
+    } catch {
+      live.textContent = 'Pantalla completa no disponible. Puedes seguir presentando en esta ventana.';
+    }
+  });
+  document.addEventListener('fullscreenchange', () => {
+    fullscreen.textContent = document.fullscreenElement === deck ? 'Reducir pantalla' : 'Pantalla completa';
+  });
+  document.addEventListener('keydown', event => {
+    if (!opened) return;
+    if (event.key === 'Escape') {
       event.preventDefault();
-      if(key==='Home')show(0);else if(key==='End')show(slides.length-1);
-      else if(['ArrowLeft','ArrowUp','PageUp'].includes(key))show(index-1);else show(index+1);
+      close();
+      return;
+    }
+    if (event.key === 'Tab') {
+      const focusables = [...deck.querySelectorAll('button:not(:disabled), select')]
+        .filter(element => element.getClientRects().length && !element.hidden);
+      const first = focusables[0];
+      const last = focusables.at(-1);
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+      return;
+    }
+    if (event.altKey || event.ctrlKey || event.metaKey
+      || event.target.matches('select, input, textarea, [contenteditable="true"]')) return;
+    const key = event.key;
+    if (['ArrowRight', 'ArrowDown', 'PageDown', 'ArrowLeft', 'ArrowUp', 'PageUp', 'Home', 'End'].includes(key)
+      || (key === ' ' && !event.target.matches('button'))) {
+      event.preventDefault();
+      if (key === 'Home') show(0);
+      else if (key === 'End') show(slides.length - 1);
+      else if (['ArrowLeft', 'ArrowUp', 'PageUp'].includes(key)) show(index - 1);
+      else show(index + 1);
     }
   });
-  stage.addEventListener('touchstart',event=>{const t=event.changedTouches[0];touchStart={x:t.clientX,y:t.clientY};},{passive:true});
-  stage.addEventListener('touchend',event=>{
-    if(!touchStart)return;const t=event.changedTouches[0],dx=t.clientX-touchStart.x,dy=t.clientY-touchStart.y;
-    if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.5)show(index+(dx<0?1:-1));touchStart=null;
-  },{passive:true});
-  stage.addEventListener('touchcancel',()=>{touchStart=null;},{passive:true});
-  show(0);
+  stage.addEventListener('touchstart', event => {
+    const touch = event.changedTouches[0];
+    touchStart = { x: touch.clientX, y: touch.clientY };
+  }, { passive: true });
+  stage.addEventListener('touchend', event => {
+    if (!touchStart) return;
+    const touch = event.changedTouches[0];
+    const dx = touch.clientX - touchStart.x;
+    const dy = touch.clientY - touchStart.y;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.5) show(index + (dx < 0 ? 1 : -1));
+    touchStart = null;
+  }, { passive: true });
+  stage.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
+
+  // Reveal launch controls only after initialization has completed successfully.
+  document.querySelectorAll('[data-present]').forEach(button => {
+    button.addEventListener('click', open);
+    button.hidden = false;
+  });
 })();

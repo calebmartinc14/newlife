@@ -1,0 +1,29 @@
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Editor and operating-system files
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*~
+
+# Python and optional local tooling
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+node_modules/
+*.log
+
+# Temporary workspace material, if copied into this repository
+/tools-temp/
+*.tar.gz
+
+# dist/ contains the editable website and MUST remain tracked.
