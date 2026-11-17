@@ -8,8 +8,10 @@ The proposed AI, IoT, cloud, and manufacturing services are project concepts. Th
 
 - Responsive sections covering the idea, product, process, enabling technologies, sustainability, market, and future research.
 - Presentation mode with slide selection, arrow-key navigation, touch gestures, and optional fullscreen.
+- A visual **Vista general** overview with 11 selectable slide cards and six photo previews.
 - Presentation focus management, live slide announcements, and reduced-motion styles.
 - Responsive WebP photographs with JPEG fallbacks; slide images render on first visit.
+- Proportionate photo frames with separate captions; mobile slides show photographs immediately below their headings.
 - Visible content and expanded navigation when JavaScript is unavailable.
 - Skip-to-content navigation, accessible active-section indicators, and public references.
 - Static HTML, CSS, and JavaScript; no package installation or build step.
@@ -28,13 +30,17 @@ The website uses Google Fonts over the network and falls back to system sans-ser
 
 ### Presentation controls
 
-Click **Presentar** or **Presentar el proyecto** to open the slides.
+Click **Presentar** or **Presentar el proyecto** to open the slides. **Vista general** opens a visual slide overview; the same control is available next to the slide selector inside the presentation. Its photo previews reuse the credited reference photographs.
 
 | Control | Action |
 | --- | --- |
-| Arrow keys / Page Up / Page Down | Previous or next slide |
-| Home / End | First or last slide |
+| Arrow keys / Page Up / Page Down in slide view | Previous or next slide |
+| Home / End in slide view | First or last slide |
 | Slide selector | Jump to a slide |
+| Vista general | Show all 11 slide cards, with photos on relevant topics |
+| Arrow keys / Home / End on overview cards | Move focus between cards |
+| Enter on an overview card | Open that slide |
+| Volver / Esc in the overview | Resume the current slide |
 | Horizontal swipe | Previous or next slide on touch devices |
 | Ver apartado web | Close the presentation and open its associated section |
 | Esc / Volver a la web | Close the presentation |
@@ -83,7 +89,7 @@ python -m playwright install chromium
 python scripts/check_browser.py
 ```
 
-The browser check starts and stops its own local preview server. It covers disabled/failed JavaScript, responsive navigation, WebP selection, all 11 slides at desktop and mobile sizes, keyboard controls, focus, fullscreen, and the swipe handler. It blocks remote font requests to exercise the system-font fallback. Use `--screenshots EXISTING_DIRECTORY` to save preview screenshots.
+The browser check starts and stops its own local preview server. It covers disabled/failed JavaScript, responsive navigation, WebP selection, natural photo proportions, caption separation, all 11 slides at desktop and mobile sizes, initial mobile-photo visibility, overview card navigation, keyboard controls, focus, fullscreen, and the swipe handler. It blocks remote font requests to exercise the system-font fallback. Use `--screenshots EXISTING_DIRECTORY` to save page, photo, slide, and overview screenshots.
 
 GitHub Actions runs both static and browser checks on pushes and pull requests. See [CONTRIBUTING.md](CONTRIBUTING.md) for additional manual checks.
 

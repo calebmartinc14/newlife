@@ -27,9 +27,11 @@
 - Check the layout on desktop, tablet, and a narrow mobile viewport; watch for horizontal overflow.
 - Open and close the mobile menu, follow each section link, and check the scroll progress indicator.
 - Open the presentation from each launch button and visit all 11 slides.
+- Open **Vista general** from the page and from the slide selector; use the photo cards, keyboard navigation, and Escape to return to a slide.
 - Check the slide selector, previous/next buttons, arrow keys, Home/End, and touch swipes where available.
 - Check fullscreen entry/exit, Escape, returning to a web section, and focus restoration.
 - Use Tab and Shift+Tab to confirm focus stays in the open presentation.
 - Check reduced-motion preferences, browser zoom, and image loading.
+- Confirm photo proportions are preserved, captions do not overlap images, and mobile slide photos appear below the heading before the explanatory text.
 - Disable JavaScript and confirm the text and section links remain usable.
 - After deployment, verify assets load under the repository subpath.

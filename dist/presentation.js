@@ -8,7 +8,6 @@
       source: 'https://commons.wikimedia.org/wiki/File:Hailey_Dawson_first_pitch_at_Orioles_Park,_August_2015.jpg',
       license: 'CC BY-SA 2.0',
       licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0/',
-      position: '85% center',
     },
     workshop: {
       src: 'assets/prosthesis-team.jpg',
@@ -17,7 +16,6 @@
       source: 'https://commons.wikimedia.org/wiki/File:Danny_Letain_et_l%27equipe_d%27ingenieur.jpg',
       license: 'CC BY 2.0',
       licenseUrl: 'https://creativecommons.org/licenses/by/2.0/',
-      position: 'center',
     },
   };
   const slides = [
@@ -43,8 +41,15 @@
   const live = document.getElementById('deck-live');
   const fullscreen = document.getElementById('deck-fullscreen');
   const exit = document.getElementById('deck-exit');
+  const overview = document.getElementById('deck-overview');
+  const overviewGrid = document.getElementById('overview-grid');
+  const overviewTitle = document.getElementById('overview-title');
+  const overviewToggle = document.getElementById('deck-overview-toggle');
+  const navigation = document.getElementById('deck-navigation');
+  const help = document.getElementById('deck-help');
   let index = 0;
   let opened = false;
+  let overviewOpen = false;
   let returnFocus = null;
   let returnScroll = 0;
   let touchStart = null;
@@ -56,6 +61,15 @@
   const renderPoints = list => `<ul class="slide-points">${list.map(
     text => `<li>${escape(text)}</li>`,
   ).join('')}</ul>`;
+  const renderPhoto = (photo, alt, className, sizes, lazy = false) => {
+    const base = photo.src.replace(/\.jpg$/, '');
+    return `<picture class="${className}">
+      <source type="image/webp" srcset="${base}-640.webp 640w, ${base}-1024.webp 1024w, ${base}-1536.webp 1536w" sizes="${sizes}">
+      <img src="${photo.src}" width="1536" height="1024" alt="${escape(alt)}" ${lazy ? 'loading="lazy"' : ''} decoding="async">
+    </picture>`;
+  };
+  const photoCredit = photo => `<a href="${photo.source}" target="_blank" rel="noopener noreferrer">${escape(photo.credit)}</a> ·
+    <a href="${photo.licenseUrl}" target="_blank" rel="noopener noreferrer">${escape(photo.license)}</a>`;
 
   // Create only lightweight slide containers at startup. Images and content are
   // rendered when a slide is first visited, rather than during page loading.
@@ -70,7 +84,55 @@
     stage.append(element);
     picker.add(new Option(`${String(i + 1).padStart(2, '0')} · ${slide.label}`, String(i)));
   });
-  const pages = [...stage.children];
+  const pages = [...stage.querySelectorAll('.deck-slide')];
+
+  function renderOverview() {
+    if (overviewGrid.childElementCount) return;
+    const photos = { inicio: assets.hand, idea: assets.workshop, producto: assets.hand,
+      proceso: assets.workshop, mercado: assets.workshop, cierre: assets.workshop };
+    slides.forEach((slide, i) => {
+      const item = document.createElement('li');
+      const button = document.createElement('button');
+      const photo = photos[slide.section];
+      button.type = 'button';
+      button.className = 'overview-card';
+      button.dataset.slideIndex = String(i);
+      button.setAttribute('aria-label', `Ir a la diapositiva ${i + 1}: ${slide.label}`);
+      const preview = photo
+        ? renderPhoto(photo, '', 'overview-picture', '(max-width: 600px) calc(100vw - 76px), (max-width: 1000px) 40vw, 360px', true)
+        : `<span class="overview-symbol" aria-hidden="true">${escape(slide.cards?.[0]?.[0] || String(i + 1).padStart(2, '0'))}</span>`;
+      button.innerHTML = `<span class="overview-preview">${preview}</span>
+        <span class="overview-card-copy"><span class="overview-number">${String(i + 1).padStart(2, '0')}</span>
+        <span class="overview-label">${escape(slide.label)}</span></span>`;
+      button.addEventListener('click', () => show(i));
+      item.append(button);
+      overviewGrid.append(item);
+    });
+    document.getElementById('overview-credits').innerHTML = `Fotografías de referencia:
+      Hailey Dawson — ${photoCredit(assets.hand)}; Danny Letain y el equipo — ${photoCredit(assets.workshop)}.
+      Versiones redimensionadas y comprimidas. Son iniciativas independientes de NewLife.`;
+  }
+
+  function showOverview() {
+    renderOverview();
+    touchStart = null;
+    overviewOpen = true;
+    pages.forEach(page => { page.hidden = true; });
+    overview.hidden = false;
+    overview.scrollTop = 0;
+    overviewGrid.querySelectorAll('button').forEach((button, i) => {
+      if (i === index) button.setAttribute('aria-current', 'step');
+      else button.removeAttribute('aria-current');
+    });
+    overviewToggle.setAttribute('aria-expanded', 'true');
+    overviewToggle.textContent = 'Volver';
+    overviewToggle.setAttribute('aria-label', 'Volver a la diapositiva actual');
+    picker.disabled = true;
+    navigation.hidden = true;
+    help.textContent = 'Elige una diapositiva · Esc para volver';
+    live.textContent = `Vista general. ${slides.length} diapositivas. Elige una para continuar.`;
+    overviewTitle.focus({ preventScroll: true });
+  }
 
   function renderSlide(i) {
     const element = pages[i];
@@ -84,15 +146,9 @@
 
     if (slide.image) {
       const photo = slide.image;
-      const base = photo.src.replace(/\.jpg$/, '');
-      element.innerHTML = `<div class="slide-split"><div>${heading}${intro}</div>
-        <figure class="slide-figure"><picture class="slide-picture">
-          <source type="image/webp" srcset="${base}-640.webp 640w, ${base}-1024.webp 1024w, ${base}-1536.webp 1536w"
-            sizes="(max-width: 800px) calc(100vw - 96px), 650px">
-          <img class="slide-image" src="${photo.src}" width="1536" height="1024" alt="${escape(slide.alt)}" style="object-position: ${photo.position}" decoding="async">
-        </picture><figcaption>${escape(photo.caption)}
-          <a href="${photo.source}" target="_blank" rel="noopener noreferrer">${escape(photo.credit)}</a> ·
-          <a href="${photo.licenseUrl}" target="_blank" rel="noopener noreferrer">${escape(photo.license)}</a>.
+      element.innerHTML = `<div class="slide-split"><div class="slide-copy">${heading}<div class="slide-intro">${intro}</div></div>
+        <figure class="slide-figure">${renderPhoto(photo, slide.alt, 'slide-picture', '(max-width: 800px) calc(100vw - 72px), 650px')}
+        <figcaption>${escape(photo.caption)} ${photoCredit(photo)}.
           Encuadre adaptado · Referencia externa a NewLife.</figcaption></figure></div>`;
     } else {
       element.innerHTML = heading + intro;
@@ -115,6 +171,15 @@
   }
 
   function show(value) {
+    const fromOverview = overviewOpen;
+    overviewOpen = false;
+    overview.hidden = true;
+    overviewToggle.setAttribute('aria-expanded', 'false');
+    overviewToggle.textContent = 'Vista general';
+    overviewToggle.removeAttribute('aria-label');
+    picker.disabled = false;
+    navigation.hidden = false;
+    help.textContent = '← → para avanzar · Esc para salir';
     index = Math.max(0, Math.min(slides.length - 1, value));
     renderSlide(index);
     pages.forEach((page, i) => {
@@ -128,6 +193,11 @@
     count.textContent = `${String(index + 1).padStart(2, '0')} / ${slides.length}`;
     bar.style.width = `${(index + 1) / slides.length * 100}%`;
     live.textContent = `Diapositiva ${index + 1} de ${slides.length}. ${slides[index].label}`;
+    if (fromOverview) {
+      const heading = pages[index].querySelector('h2');
+      heading.tabIndex = -1;
+      heading.focus({ preventScroll: true });
+    }
   }
 
   function open(event) {
@@ -143,12 +213,14 @@
       element.inert = true;
     });
     show(index);
-    exit.focus({ preventScroll: true });
+    if (event.currentTarget.hasAttribute('data-overview')) showOverview();
+    else exit.focus({ preventScroll: true });
   }
 
   async function close(section) {
     if (!opened) return;
     opened = false;
+    touchStart = null;
     if (document.fullscreenElement === deck) {
       await document.exitFullscreen().catch(() => {});
     }
@@ -174,6 +246,12 @@
   prev.addEventListener('click', () => show(index - 1));
   next.addEventListener('click', () => show(index + 1));
   picker.addEventListener('change', () => show(Number(picker.value)));
+  overviewToggle.addEventListener('click', () => {
+    if (overviewOpen) {
+      show(index);
+      overviewToggle.focus();
+    } else showOverview();
+  });
   document.getElementById('deck-source').addEventListener('click', () => close(slides[index].section));
   if (!deck.requestFullscreen) fullscreen.hidden = true;
   fullscreen.addEventListener('click', async () => {
@@ -191,12 +269,15 @@
     if (!opened) return;
     if (event.key === 'Escape') {
       event.preventDefault();
-      close();
+      if (overviewOpen) {
+        show(index);
+        overviewToggle.focus();
+      } else close();
       return;
     }
     if (event.key === 'Tab') {
       const focusables = [...deck.querySelectorAll('button:not(:disabled), select, a[href]')]
-        .filter(element => element.getClientRects().length && !element.hidden);
+        .filter(element => element.getClientRects().length && !element.hidden && !element.disabled);
       const first = focusables[0];
       const last = focusables.at(-1);
       if (event.shiftKey && document.activeElement === first) {
@@ -211,6 +292,21 @@
     if (event.altKey || event.ctrlKey || event.metaKey
       || event.target.matches('select, input, textarea, [contenteditable="true"]')) return;
     const key = event.key;
+    if (overviewOpen) {
+      const card = event.target.closest('[data-slide-index]');
+      if (card && ['ArrowRight', 'ArrowLeft', 'ArrowDown', 'ArrowUp', 'Home', 'End'].includes(key)) {
+        event.preventDefault();
+        const cards = [...overviewGrid.querySelectorAll('button')];
+        const columns = getComputedStyle(overviewGrid).gridTemplateColumns.split(' ').length;
+        const current = Number(card.dataset.slideIndex);
+        let target = current;
+        if (key === 'Home') target = 0;
+        else if (key === 'End') target = cards.length - 1;
+        else target += ({ ArrowRight: 1, ArrowLeft: -1, ArrowDown: columns, ArrowUp: -columns })[key];
+        cards[Math.max(0, Math.min(cards.length - 1, target))].focus();
+      }
+      return;
+    }
     if (['ArrowRight', 'ArrowDown', 'PageDown', 'ArrowLeft', 'ArrowUp', 'PageUp', 'Home', 'End'].includes(key)
       || (key === ' ' && !event.target.matches('button'))) {
       event.preventDefault();
@@ -221,11 +317,12 @@
     }
   });
   stage.addEventListener('touchstart', event => {
+    if (!opened || overviewOpen) return;
     const touch = event.changedTouches[0];
     touchStart = { x: touch.clientX, y: touch.clientY };
   }, { passive: true });
   stage.addEventListener('touchend', event => {
-    if (!touchStart) return;
+    if (!touchStart || overviewOpen || !opened) return;
     const touch = event.changedTouches[0];
     const dx = touch.clientX - touchStart.x;
     const dy = touch.clientY - touchStart.y;
@@ -235,7 +332,7 @@
   stage.addEventListener('touchcancel', () => { touchStart = null; }, { passive: true });
 
   // Reveal launch controls only after initialization has completed successfully.
-  document.querySelectorAll('[data-present]').forEach(button => {
+  document.querySelectorAll('[data-present], [data-overview]').forEach(button => {
     button.addEventListener('click', open);
     button.hidden = false;
   });

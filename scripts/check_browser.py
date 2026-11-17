@@ -26,6 +26,21 @@ def no_overflow(page):
     assert page.evaluate("document.documentElement.scrollWidth <= innerWidth"), "Horizontal overflow"
 
 
+def settle_layout(page):
+    page.evaluate("() => new Promise(resolve => requestAnimationFrame(() => requestAnimationFrame(resolve)))")
+
+
+def check_photo_frame(figure):
+    image = figure.locator("img")
+    box = image.bounding_box()
+    caption = figure.locator("figcaption").bounding_box()
+    frame = figure.bounding_box()
+    assert abs(box["width"] / box["height"] - 1.5) < 0.015, "Photo aspect ratio changed"
+    assert image.evaluate("image => getComputedStyle(image).objectFit === 'contain'"), "Photo is cropped"
+    assert caption["y"] >= box["y"] + box["height"] - 1, "Caption overlaps its photo"
+    assert caption["y"] + caption["height"] <= frame["y"] + frame["height"] + 1, "Caption is clipped"
+
+
 def check_fallback(browser, url, *, javascript=True, blocked=None):
     context = browser.new_context(
         java_script_enabled=javascript, viewport={"width": 375, "height": 812}, reduced_motion="reduce",
@@ -40,7 +55,7 @@ def check_fallback(browser, url, *, javascript=True, blocked=None):
         "elements => elements.every(el => getComputedStyle(el).opacity === '1')"
     )
     if not javascript or blocked == "presentation.js":
-        assert page.locator("[data-present]:visible").count() == 0
+        assert page.locator("[data-present]:visible, [data-overview]:visible").count() == 0
     if not javascript or blocked == "site.js":
         expect(page.locator("#navlinks")).to_be_visible()
         expect(page.locator("#menu")).to_be_hidden()
@@ -77,6 +92,7 @@ def check_interactions(browser, url, screenshots):
 
     for width, height in ((1440, 900), (1280, 720), (1024, 768), (768, 1024), (375, 812), (320, 640)):
         page.set_viewport_size({"width": width, "height": height})
+        settle_layout(page)
         page.evaluate("scrollTo(0, 0)")
         no_overflow(page)
         assert page.locator("header").bounding_box()["height"] <= 80, "Header controls wrapped"
@@ -91,6 +107,11 @@ def check_interactions(browser, url, screenshots):
             page.locator('#navlinks a[href="#proceso"]').click()
             expect(page.locator('#navlinks a[href="#proceso"]')).to_have_attribute("aria-current", "location")
             expect(page.locator("#navlinks")).to_be_hidden()
+        for i, figure in enumerate(page.locator("main figure").all()):
+            figure.scroll_into_view_if_needed()
+            check_photo_frame(figure)
+            if screenshots and width in (1440, 375):
+                figure.screenshot(path=str(screenshots / f"newlife-photo-{width}-{i}.png"))
         if screenshots and width in (1440, 375):
             page.evaluate("scrollTo(0, 0)")
             page.screenshot(path=str(screenshots / f"newlife-{width}.png"))
@@ -129,10 +150,38 @@ def check_interactions(browser, url, screenshots):
     page.locator("#deck-fullscreen").click()
     page.wait_for_function("document.fullscreenElement === null")
 
+    page.locator("#deck-overview-toggle").click()
+    expect(page.locator("#deck-overview")).to_be_visible()
+    expect(page.locator("#overview-title")).to_be_focused()
+    expect(page.locator("#deck-select")).to_be_disabled()
+    expect(page.locator("#deck-navigation")).to_be_hidden()
+    expect(page.locator(".overview-card")).to_have_count(11)
+    expect(page.locator(".overview-card img")).to_have_count(6)
+    cards = page.locator(".overview-card")
+    cards.first.focus()
+    page.keyboard.press("ArrowRight")
+    expect(cards.nth(1)).to_be_focused()
+    page.keyboard.press("End")
+    expect(cards.last).to_be_focused()
+    page.keyboard.press("Home")
+    expect(cards.first).to_be_focused()
+    cards.nth(2).click()
+    expect(page.locator("#deck-overview")).to_be_hidden()
+    expect(page.locator("#deck-select")).to_have_value("2")
+    expect(page.locator("#slide-3 h2")).to_be_focused()
+    page.locator("#deck-overview-toggle").click()
+    page.keyboard.press("Escape")
+    expect(page.locator("#deck-overview")).to_be_hidden()
+    expect(page.locator("#deck-overview-toggle")).to_be_focused()
+    expect(page.locator("#deck-select")).to_have_value("2")
+    print("PASS: overview thumbnails, card selection, keyboard navigation, and Escape return")
+
     for width, height in ((1440, 900), (844, 390), (375, 812), (320, 640)):
         page.set_viewport_size({"width": width, "height": height})
+        settle_layout(page)
         for i in range(11):
             page.locator("#deck-select").select_option(str(i))
+            settle_layout(page)
             slide = page.locator(f"#slide-{i + 1}")
             expect(slide).to_be_visible()
             assert slide.evaluate("element => element.scrollWidth <= element.clientWidth"), f"Slide {i + 1} overflows"
@@ -142,9 +191,39 @@ def check_interactions(browser, url, screenshots):
             expect(page.locator("#deck-source")).to_be_visible()
             if slide.locator("img").count():
                 image = slide.locator("img")
+                if width <= 800 and height >= 640:
+                    image_box = image.bounding_box()
+                    slide_box = slide.bounding_box()
+                    title_box = slide.locator("h2").bounding_box()
+                    intro_box = slide.locator(".slide-intro").bounding_box()
+                    assert image_box["y"] >= title_box["y"] + title_box["height"], "Photo precedes its heading"
+                    assert image_box["y"] + image_box["height"] <= slide_box["y"] + slide_box["height"], "Photo is below the initial viewport"
+                    assert image_box["y"] < intro_box["y"], "Photo is buried below slide text"
                 image.scroll_into_view_if_needed()
                 expect(image).to_have_js_property("complete", True)
                 assert image.evaluate("element => element.naturalWidth > 0 && element.currentSrc.endsWith('.webp')")
+                check_photo_frame(slide.locator("figure"))
+        page.locator("#deck-overview-toggle").click()
+        overview = page.locator("#deck-overview")
+        assert overview.evaluate("element => element.scrollWidth <= element.clientWidth"), "Overview overflows"
+        expect(page.locator('.overview-card[aria-current="step"]')).to_have_attribute("data-slide-index", "10")
+        for image in page.locator(".overview-card img").all():
+            image.scroll_into_view_if_needed()
+            expect(image).to_have_js_property("complete", True)
+            assert image.evaluate("element => element.naturalWidth > 0 && element.currentSrc.endsWith('.webp')")
+            box = image.bounding_box()
+            assert abs(box["width"] / box["height"] - 1.5) < 0.015, "Thumbnail is cropped"
+        if screenshots and width in (1440, 375):
+            overview.evaluate("element => element.scrollTop = 0")
+            settle_layout(page)
+            page.screenshot(path=str(screenshots / f"newlife-overview-{width}.png"))
+        first_control = page.locator("#deck-exit" if width <= 680 else "#deck-fullscreen")
+        first_control.focus()
+        page.keyboard.press("Shift+Tab")
+        expect(page.locator("#deck-overview-toggle")).to_be_focused()
+        page.keyboard.press("Tab")
+        expect(first_control).to_be_focused()
+        page.locator("#deck-overview-toggle").click()
         no_overflow(page)
         print(f"PASS: all 11 slides at {width}x{height}")
 
@@ -167,6 +246,13 @@ def check_interactions(browser, url, screenshots):
     }""")
     expect(page.locator("#deck-select")).to_have_value("1")
     page.keyboard.press("Escape")
+    page.locator("[data-overview]").click()
+    expect(page.locator("#deck-overview")).to_be_visible()
+    page.keyboard.press("Escape")
+    expect(page.locator("#presentation")).to_be_visible()
+    expect(page.locator("#deck-overview")).to_be_hidden()
+    page.keyboard.press("Escape")
+    expect(page.locator("[data-overview]")).to_be_focused()
     assert not errors, errors
     context.close()
     print("PASS: launchers, keyboard, focus trap/restoration, fullscreen, section return, and swipe handler")

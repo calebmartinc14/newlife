@@ -60,6 +60,7 @@
           <p>NewLife 3D es una propuesta de diseño personalizado y fabricación aditiva de prótesis. Una idea que une tecnología, personas y una forma más consciente de producir.</p>
           <div class="actions">
             <button class="button primary present-trigger" data-present type="button" aria-haspopup="dialog" aria-controls="presentation" hidden>▶ Presentar el proyecto</button>
+            <button class="button secondary" data-overview type="button" aria-haspopup="dialog" aria-controls="presentation" hidden>Vista general</button>
             <a class="button secondary" href="#idea">Descubre la propuesta <span aria-hidden="true">↗</span></a>
             <a class="button secondary" href="#producto">Ver el producto <span aria-hidden="true">↓</span></a>
           </div>
@@ -75,8 +76,6 @@
             </picture>
             <figcaption>Hailey Dawson · Uso real de una mano impresa en 3D.<br><a href="#foto-hailey">Keith Allison · CC BY-SA 2.0</a> · Referencia externa.</figcaption>
           </figure>
-          <div class="art-tag a">UN EJEMPLO REAL</div>
-          <div class="art-tag b">PRÓTESIS IMPRESA EN 3D</div>
         </div>
       </div>
       <div class="hero-bottom"><div class="wrap"><span>01 / Una idea con propósito</span><span>Desliza para explorar ↓</span></div></div>
@@ -299,11 +298,24 @@
         <button id="deck-exit" class="deck-exit" type="button">Volver a la web <span aria-hidden="true">×</span></button>
       </div>
     </div>
-    <div class="deck-stage" id="deck-stage"></div>
+    <div class="deck-stage" id="deck-stage">
+      <section class="deck-overview" id="deck-overview" aria-labelledby="overview-title" hidden>
+        <div class="overview-heading">
+          <p class="slide-kicker">NewLife 3D · 11 diapositivas</p>
+          <h2 id="overview-title" tabindex="-1">Vista general de la presentación</h2>
+          <p>Elige una diapositiva para empezar o retomar la exposición.</p>
+        </div>
+        <ol class="overview-grid" id="overview-grid"></ol>
+        <p class="overview-credits" id="overview-credits"></p>
+      </section>
+    </div>
     <div class="deck-bottom">
-      <div><label for="deck-select">Ir a </label><select id="deck-select" class="deck-select" aria-label="Elegir diapositiva"></select></div>
+      <div class="deck-jump">
+        <label for="deck-select">Ir a </label><select id="deck-select" class="deck-select" aria-label="Elegir diapositiva"></select>
+        <button id="deck-overview-toggle" type="button" aria-controls="deck-overview" aria-expanded="false">Vista general</button>
+      </div>
       <p class="deck-hint" id="deck-help">← → para avanzar · Esc para salir</p>
-      <div class="deck-nav">
+      <div class="deck-nav" id="deck-navigation">
         <button type="button" id="deck-source" class="deck-source">Ver apartado web</button>
         <button type="button" id="deck-prev" aria-label="Diapositiva anterior">← Anterior</button>
         <span class="deck-count" id="deck-count" aria-hidden="true"></span>

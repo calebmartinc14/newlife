@@ -34,17 +34,18 @@ body.presenting { overflow: hidden; }
   background: radial-gradient(ellipse at 90% 10%, #16445b80, transparent 65%), #081a29;
   box-shadow: 0 25px 70px #0004;
 }
-.deck-slide { height: 100%; padding: clamp(22px, 4cqw, 64px); display: flex; flex-direction: column; justify-content: safe center; overflow-y: auto; animation: slide-in .3s ease-out; }
+.deck-slide { width: 100%; min-width: 0; height: 100%; padding: clamp(22px, 4cqw, 64px); display: flex; flex-direction: column; justify-content: safe center; overflow-y: auto; animation: slide-in .3s ease-out; }
 .deck-slide > * { flex-shrink: 0; }
 .slide-kicker { color: #53e5ec; letter-spacing: .16em; text-transform: uppercase; font-size: clamp(.7rem, 1cqw, 1rem); font-weight: 700; display: flex; align-items: center; gap: 12px; margin: 0 0 15px; }
 .slide-kicker::before { content: ""; height: 1px; width: 28px; background: currentColor; }
-.slide-title { font: 600 clamp(1.9rem, 4.5cqw, 4.4rem)/1.07 "Space Grotesk", sans-serif; letter-spacing: -.055em; margin: 0 0 24px; max-width: 1050px; }
+.slide-title { font: 600 clamp(1.9rem, 4.5cqw, 4.4rem)/1.07 "Space Grotesk", sans-serif; letter-spacing: -.055em; margin: 0 0 24px; max-width: 1050px; overflow-wrap: anywhere; }
 .slide-title em { font-style: normal; color: #53e5ec; }
 .slide-lead { color: #afc7d5; font-size: clamp(1rem, 1.65cqw, 1.6rem); line-height: 1.55; margin: 0 0 24px; max-width: 920px; }
-.slide-split { display: grid; grid-template-columns: 1.05fr .95fr; gap: 5%; align-items: center; }
+.slide-split { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 5%; align-items: center; }
+.slide-copy, .slide-intro { min-width: 0; }
 .slide-split .slide-title { font-size: clamp(2rem, 4.6cqw, 4.5rem); }
 .slide-picture { display: block; }
-.slide-image { width: 100%; height: clamp(220px, 31cqw, 490px); object-fit: cover; display: block; border-radius: 12px; border: 1px solid #356073; }
+.slide-picture img { width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; display: block; border-radius: 12px; border: 1px solid #356073; }
 .slide-figure { margin: 0; min-width: 0; }
 .slide-figure figcaption { font-size: clamp(.65rem, .85cqw, .85rem); color: #9ab1c1; margin-top: 10px; }
 .slide-figure figcaption a { color: #53e5ec; text-decoration: underline; text-underline-offset: 3px; }
@@ -65,12 +66,35 @@ body.presenting { overflow: hidden; }
 .slide-steps .slide-block p { font-size: clamp(.9rem, 1.2cqw, 1.2rem); }
 .slide-callout { padding: 18px 22px; border-left: 3px solid #53e5ec; background: #123244; color: #d4e4ee; font-size: clamp(1rem, 1.5cqw, 1.5rem); margin-top: 24px; }
 .deck-bottom { flex-wrap: wrap; }
+.deck-jump { display: flex; align-items: center; gap: 8px; max-width: 460px; min-width: 0; }
+.deck-jump select { flex: 1; min-width: 0; }
+#deck-overview-toggle { white-space: nowrap; }
+#deck-overview-toggle[aria-expanded="true"] { border-color: #53e5ec; color: #53e5ec; }
 .deck-bottom label { font-size: .75rem; color: #9ab1c1; }
 .deck-select { max-width: 300px; }
 .deck-hint { color: #9ab1c1; font-size: .75rem; margin: 0; }
 .deck-count { min-width: 62px; text-align: center; font-variant-numeric: tabular-nums; color: #afc7d5; font-size: .85rem; }
 .deck-track { position: absolute; bottom: 0; left: 0; right: 0; height: 3px; background: #19384a; }
 .deck-track span { display: block; height: 100%; background: #53e5ec; transition: width .25s; }
+
+/* The overview uses the same slide data and licensed photos as the deck. */
+.deck-overview { height: 100%; overflow-y: auto; padding: clamp(20px, 3cqw, 44px); }
+.overview-heading { max-width: 780px; margin-bottom: 28px; }
+.overview-heading h2 { font: 600 clamp(1.7rem, 3cqw, 2.7rem)/1.15 "Space Grotesk", sans-serif; margin: 0 0 12px; letter-spacing: -.04em; }
+.overview-heading > p:last-child { color: #afc7d5; margin: 0; }
+.overview-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; padding: 0; margin: 0; list-style: none; }
+.overview-grid li { min-width: 0; }
+.deck .overview-card { width: 100%; height: 100%; display: flex; flex-direction: column; padding: 0; overflow: hidden; text-align: left; background: #102638; border: 1px solid #36576b; border-radius: 10px; }
+.deck .overview-card:hover, .deck .overview-card[aria-current="step"] { border-color: #53e5ec; background: #123144; }
+.overview-card:focus-visible { outline-offset: -4px; }
+.overview-preview { display: grid; width: 100%; aspect-ratio: 3 / 2; place-items: center; background: radial-gradient(ellipse at top right, #19546b, #081a29); }
+.overview-picture, .overview-picture img { display: block; width: 100%; height: auto; aspect-ratio: 3 / 2; object-fit: contain; }
+.overview-symbol { font: 500 clamp(2rem, 4cqw, 4rem) "Space Grotesk", sans-serif; color: #53e5ec; }
+.overview-card-copy { display: flex; align-items: baseline; gap: 12px; padding: 16px; }
+.overview-number { color: #53e5ec; font-size: .8rem; }
+.overview-label { font-size: 1rem; line-height: 1.4; overflow-wrap: anywhere; }
+.overview-credits { color: #afc7d5; font-size: .8rem; line-height: 1.6; margin: 28px 0 0; }
+.overview-credits a { color: #53e5ec; text-decoration: underline; text-underline-offset: 3px; }
 
 @keyframes slide-in {
   from { opacity: 0; transform: translateX(18px); }
@@ -83,7 +107,6 @@ body.presenting { overflow: hidden; }
   .slide-title, .slide-split .slide-title { font-size: 3.8cqw; margin-bottom: 15px; }
   .slide-lead, .slide-points li { font-size: 1.4cqw; }
   .slide-points { gap: 12px; margin-top: 16px; }
-  .slide-image { height: 27cqw; max-height: 49vh; }
   .slide-block { padding: 20px; }
   .slide-block h3 { font-size: 1.6cqw; }
   .slide-block p { font-size: 1.22cqw; }
@@ -97,16 +120,24 @@ body.presenting { overflow: hidden; }
   .slide-steps { grid-template-columns: 1fr 1fr; }
 }
 
+@media (max-width: 1000px) {
+  .overview-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
 @media (max-width: 800px) {
   .deck-mode, .deck-hint { display: none; }
   .deck-top { gap: 8px; }
   .deck-tools button { font-size: .75rem; padding: 9px 10px; }
   .deck-brand { font-size: 1rem; }
   .deck-slide { justify-content: flex-start; padding: 28px 24px; }
-  .slide-split { grid-template-columns: 1fr; gap: 24px; }
+  .slide-split { display: flex; flex-direction: column; gap: 16px; align-items: stretch; }
+  .slide-copy { display: contents; }
+  .slide-split .slide-kicker { order: 0; margin: 0; }
+  .slide-split .slide-title { order: 1; margin: 0; }
+  .slide-split .slide-figure { order: 2; }
+  .slide-split .slide-intro { order: 3; }
   .slide-grid { grid-template-columns: 1fr; }
   .slide-split .slide-title, .slide-title { font-size: clamp(2rem, 6cqw, 3.3rem); }
-  .slide-image { height: 230px; }
   .slide-figure { max-width: 650px; }
   .slide-lead, .slide-points li { font-size: 1.05rem; }
   .slide-block h3 { font-size: 1.3rem; }
@@ -131,6 +162,15 @@ body.presenting { overflow: hidden; }
   .slide-title { margin-bottom: 20px; }
   .slide-block { padding: 20px; }
   .deck-count { min-width: 50px; }
+  .deck-jump { width: 100%; max-width: none; }
+  .slide-split { gap: 14px; }
+  .slide-kicker { font-size: .65rem; }
+  .deck-slide { padding: 20px; }
+}
+
+@media (max-width: 600px) {
+  .overview-grid { grid-template-columns: minmax(0, 1fr); gap: 16px; }
+  .overview-heading { margin-bottom: 20px; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -6,6 +6,8 @@ Reviewed and improved on 2026-11-17. The original findings below describe the su
 
 - **Photography update:** the page and slides now show Hailey Dawson using a 3D-printed hand and Danny Letain with an engineering team. These are credited, independently sourced real-world references, with JPEG fallbacks and responsive WebP variants. The full-size WebP pair is 403,140 bytes; the 640-pixel pair is 87,524 bytes. See `ASSET_CREDITS.md` for licenses and modifications.
 - **Image loading:** slide content and images render only when first visited. Before the real-photo update, the earlier conceptual PNG pair had been optimized from 4,149,086 bytes to 233,520 bytes of full-size WebP images.
+- **Image layout correction:** removed the tall forced frames, decorative rotation, and floating labels that obscured the mobile photo caption. Page and slide images now retain the full 3:2 working-master composition with captions outside the image. Mobile photo slides display their image after the heading and before the explanatory text.
+- **Presentation overview:** **Vista general** opens an 11-card visual index, including six cards with photo previews. It is available from the page and inside the presentation, supports keyboard/card navigation, preserves the current slide, and retains photo attribution links.
 - **Progressive enhancement:** page content is visible by default, navigation stays expanded without its script, and presentation buttons become available only after initialization.
 - **Maintainability:** page CSS and JavaScript were extracted into `site.css` and `site.js`; page/illustration overrides were removed from presentation CSS, and HTML/CSS were expanded into readable sections.
 - **Navigation and accessibility:** a skip link, `aria-current` indicators, a complete section menu at every breakpoint, Escape/outside-click menu closing, and preserved modal focus management. Overflowing slides remain scrollable from their beginning.
@@ -114,11 +116,12 @@ The evidence in this section describes the initial version. Use the completed-st
 
 ### Local results
 
-- The checker passed after the photo update: 1 HTML page, 43 local references, and 2 JavaScript sources.
+- The checker passed after the image-layout/overview update: 1 HTML page, 46 local references, and 2 JavaScript sources.
 - In-memory fault injection confirmed that the checker rejects missing assets, incorrect filename casing, missing fragment targets, duplicate IDs, images without an `alt` attribute, and invalid JavaScript.
 - Chromium checks passed with JavaScript disabled, with either page or presentation JavaScript blocked, and with normal/reduced motion.
 - Page navigation/layout checks passed at 1440×900, 1280×720, 1024×768, 768×1024, 375×812, and 320×640.
 - All 11 slides passed horizontal-overflow and scroll-start checks at 1440×900, 844×390, 375×812, and 320×640.
+- Photo aspect ratios and caption boundaries were checked at all page sizes; mobile slide images were checked before scrolling. Overview previews, thumbnail loading, current-slide indication, card keyboard navigation, focus trapping, and Escape/selection return passed at desktop and mobile sizes.
 - Keyboard navigation, slide selection, focus trapping/restoration, fullscreen entry/exit, correct process-section return, and the swipe handler passed. Page and slide images selected WebP sources; no PNG requests occurred in the page-loading check.
 - Tests served the site under `/dist/` to exercise subpath-compatible relative URLs. Desktop/mobile screenshots were also inspected locally.
 - The four new public references were retrieved successfully during implementation. GitHub-hosted workflow execution remains to be exercised after publication.
